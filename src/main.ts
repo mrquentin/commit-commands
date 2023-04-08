@@ -1,31 +1,34 @@
-import * as core from '@actions/core'
-import * as github from '@actions/github'
-import {PushEvent} from '@octokit/webhooks-definitions/schema'
-import {Cargo} from '@rinse-repeat/actions-rs-core'
+import * as core from "@actions/core";
+import * as github from "@actions/github";
+import * as exec from "@actions/exec";
+import { PushEvent } from "@octokit/webhooks-definitions/schema";
 
 export async function run(): Promise<void> {
-  const cargo = await Cargo.get()
+  if (github.context.eventName === "push") {
+    const pushPayload = github.context.payload as PushEvent;
+    const commit = pushPayload.head_commit;
 
-  if (github.context.eventName === 'push') {
-    const pushPayload = github.context.payload as PushEvent
-    const commit = pushPayload.head_commit
+    console.log("Push detected, bumping version...");
 
-    if (commit?.message?.startsWith('major:')) {
-      await cargo.call(['bump', 'major'])
-    } else if (commit?.message?.startsWith('minor:')) {
-      await cargo.call(['bump', 'minor'])
-    } else if (commit?.message?.startsWith('fix:')) {
-      await cargo.call(['bump'])
+    if (commit?.message?.startsWith("major:")) {
+      console.log("Major bump ...");
+      await exec.exec("cargo", ["bump", "major"]);
+    } else if (commit?.message?.startsWith("minor:")) {
+      console.log("Minor bump ...");
+      await exec.exec("cargo", ["bump", "minor"]);
+    } else if (commit?.message?.startsWith("fix:")) {
+      console.log("Patch bump ...");
+      await exec.exec("cargo", ["bump", "patch"]);
     }
   }
 }
 
 async function main(): Promise<void> {
   try {
-    await run()
+    await run();
   } catch (error) {
-    core.setFailed((<Error>error).message)
+    core.setFailed((<Error>error).message);
   }
 }
 
-void main()
+void main();

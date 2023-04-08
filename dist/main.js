@@ -26,21 +26,24 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.run = void 0;
 const core = __importStar(require("@actions/core"));
 const github = __importStar(require("@actions/github"));
-const actions_rs_core_1 = require("@rinse-repeat/actions-rs-core");
+const exec = __importStar(require("@actions/exec"));
 async function run() {
     var _a, _b, _c;
-    const cargo = await actions_rs_core_1.Cargo.get();
-    if (github.context.eventName === 'push') {
+    if (github.context.eventName === "push") {
         const pushPayload = github.context.payload;
         const commit = pushPayload.head_commit;
-        if ((_a = commit === null || commit === void 0 ? void 0 : commit.message) === null || _a === void 0 ? void 0 : _a.startsWith('major:')) {
-            await cargo.call(['bump', 'major']);
+        console.log("Push detected, bumping version...");
+        if ((_a = commit === null || commit === void 0 ? void 0 : commit.message) === null || _a === void 0 ? void 0 : _a.startsWith("major:")) {
+            console.log("Major bump ...");
+            await exec.exec("cargo", ["bump", "major"]);
         }
-        else if ((_b = commit === null || commit === void 0 ? void 0 : commit.message) === null || _b === void 0 ? void 0 : _b.startsWith('minor:')) {
-            await cargo.call(['bump', 'minor']);
+        else if ((_b = commit === null || commit === void 0 ? void 0 : commit.message) === null || _b === void 0 ? void 0 : _b.startsWith("minor:")) {
+            console.log("Minor bump ...");
+            await exec.exec("cargo", ["bump", "minor"]);
         }
-        else if ((_c = commit === null || commit === void 0 ? void 0 : commit.message) === null || _c === void 0 ? void 0 : _c.startsWith('fix:')) {
-            await cargo.call(['bump']);
+        else if ((_c = commit === null || commit === void 0 ? void 0 : commit.message) === null || _c === void 0 ? void 0 : _c.startsWith("fix:")) {
+            console.log("Patch bump ...");
+            await exec.exec("cargo", ["bump", "patch"]);
         }
     }
 }
