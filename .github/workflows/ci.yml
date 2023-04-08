@@ -1,0 +1,16 @@
+name: Continuous Integration
+
+on: [pull_request, push]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create npm config
+        run: echo "//npm.pkg.github.com/:_authToken=${token}" >> ~/.npmrc
+        env:
+          token: ${{secrets.GITHUB_TOKEN}}
+      - uses: actions/checkout@v2
+      - run : npm ci
+      - run : npm run build
+      - run : npm run test
